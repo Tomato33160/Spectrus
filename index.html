@@ -1,48 +1,86 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spectrus - Accueil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spectrus - Interface Épurée</title>
+  <style>
+    body { margin: 0; font-family: 'Arial', sans-serif; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .container { background: #1a1a1a; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); width: 90%; max-width: 600px; text-align: center; }
+    h1 { font-size: 2em; margin-bottom: 20px; }
+    .button { padding: 10px 20px; margin: 5px; background: #4a90e2; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    .button:hover { background: #357abd; }
+    .content { display: none; margin-top: 20px; }
+    .active { display: block; }
+    .input-group { margin: 10px 0; }
+    input { padding: 8px; width: 80%; max-width: 300px; background: #333; border: 1px solid #555; color: #fff; }
+    #canvas { border: 1px solid #555; margin-top: 10px; background: #000; }
+    textarea { width: 80%; max-width: 300px; background: #333; border: 1px solid #555; color: #fff; }
+    #codeOutput { margin-top: 10px; color: #ddd; }
+  </style>
 </head>
 <body>
-    <header>
-        <img src="Spectrus.jpg" alt="Logo Spectrus" class="logo">
-        <h1>Spectrus</h1>
-        <nav>
-            <a href="index.html">Accueil</a>
-            <a href="about.html">À propos</a>
-            <a href="contact.html">Contact</a>
-        </nav>
-    </header>
-    <main>
-        <section class="hero">
-            <div class="slideshow">
-                <img src="https://via.placeholder.com/800x400?text=Projet+1" class="slide">
-                <img src="https://via.placeholder.com/800x400?text=Projet+2" class="slide">
-                <img src="https://via.placeholder.com/800x400?text=Projet+3" class="slide">
-            </div>
-            <h2>Bienvenue chez Spectrus</h2>
-            <p>Découvre des projets futuristes pour la tech de demain !</p>
-            <button onclick="alert('Explore nos innovations !')">Découvrir</button>
-        </section>
-        <section class="projects">
-            <h2>Nos Projets</h2>
-            <div class="project-item">
-                <h3>Pencil Bot</h3>
-                <p>Assistant de dessin intelligent. Compatible Arduino.</p>
-            </div>
-            <div class="project-item">
-                <h3>Mind Control</h3>
-                <p>Interface cerveau-machine révolutionnaire.</p>
-            </div>
-        </section>
-    </main>
-    <footer>
-        <p>© 2025 Spectrus - Tous droits réservés</p>
-    </footer>
-    <script src="script.js"></script>
+  <div class="container">
+    <h1>Spectrus</h1>
+    <button class="button" onclick="showSection('info')">Info</button>
+    <button class="button" onclick="showSection('image')">Image</button>
+    <button class="button" onclick="showSection('game')">Jeu</button>
+    <button class="button" onclick="showSection('code')">Code</button>
+    <div id="info" class="content active">
+      <p>Bienvenue sur Spectrus ! Explorez les fonctionnalités ci-dessous.</p>
+    </div>
+    <div id="image" class="content">
+      <div class="input-group">
+        <input type="text" id="imagePrompt" placeholder="Décris une image...">
+        <button class="button" onclick="generateImage()">Générer</button>
+      </div>
+      <canvas id="canvas" width="400" height="400"></canvas>
+    </div>
+    <div id="game" class="content">
+      <button class="button" onclick="startGame()">Démarrer</button>
+      <p id="gameScore">Score: 0</p>
+    </div>
+    <div id="code" class="content">
+      <textarea id="codeEditor" rows="5" placeholder="Écris ton code ici..."></textarea>
+      <button class="button" onclick="runCode()">Exécuter</button>
+      <div id="codeOutput"></div>
+    </div>
+  </div>
+
+  <script>
+    function showSection(section) {
+      document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+      document.getElementById(section).classList.add('active');
+    }
+
+    function generateImage() {
+      const prompt = document.getElementById('imagePrompt').value;
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.font = '20px Arial';
+      ctx.fillText(prompt.substring(0, 20) || 'Image générée', 10, 20);
+      alert('Image générée (simulation) : ' + prompt);
+    }
+
+    let score = 0;
+    function startGame() {
+      score++;
+      document.getElementById('gameScore').textContent = 'Score: ' + score;
+      alert('Jeu démarré ! Clique pour augmenter le score.');
+    }
+
+    function runCode() {
+      const code = document.getElementById('codeEditor').value;
+      try {
+        const output = eval(code);
+        document.getElementById('codeOutput').textContent = 'Résultat : ' + (output || 'OK');
+      } catch (e) {
+        document.getElementById('codeOutput').textContent = 'Erreur : ' + e.message;
+      }
+    }
+  </script>
 </body>
 </html>
