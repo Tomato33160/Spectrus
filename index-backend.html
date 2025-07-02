@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spectrus - Backend</title>
+</head>
+<body>
+  <script>
+    let users = JSON.parse(localStorage.getItem('users')) || {};
+    let messages = JSON.parse(localStorage.getItem('messages')) || [];
+
+    function saveData() {
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('messages', JSON.stringify(messages));
+    }
+
+    // Gère les requêtes
+    window.onload = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const action = urlParams.get('action');
+
+      if (action === 'login') {
+        const username = urlParams.get('username');
+        const password = urlParams.get('password');
+        if (users[username] && users[username].password === password) {
+          document.write('success');
+        } else {
+          document.write('fail');
+        }
+      } else if (action === 'register') {
+        const username = urlParams.get('username');
+        const password = urlParams.get('password');
+        if (!users[username]) {
+          users[username] = { password, avatar: 'https://via.placeholder.com/30' };
+          saveData();
+          document.write('success');
+        } else {
+          document.write('fail');
+        }
+      } else if (action === 'getMessages') {
+        document.write(JSON.stringify(messages));
+      } else if (action === 'sendMessage') {
+        const username = urlParams.get('username');
+        const text = urlParams.get('text');
+        if (username && text) {
+          messages.push({ username, text, avatar: users[username]?.avatar || 'https://via.placeholder.com/30', timestamp: new Date() });
+          saveData();
+        }
+        document.write('success');
+      } else if (action === 'updateAvatar') {
+        const username = urlParams.get('username');
+        const avatar = urlParams.get('avatar');
+        if (username && avatar) {
+          users[username].avatar = avatar;
+          saveData();
+        }
+        document.write('success');
+      }
+    };
+  </script>
+</body>
+</html>
