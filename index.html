@@ -3,47 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spectrus - Interface Épurée</title>
+  <title>Spectrus - Solutions d'Entreprise</title>
   <style>
-    body { margin: 0; font-family: 'Arial', sans-serif; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-    .container { background: #1a1a1a; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); width: 90%; max-width: 600px; text-align: center; }
-    h1 { font-size: 2em; margin-bottom: 20px; }
-    .button { padding: 10px 20px; margin: 5px; background: #4a90e2; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
-    .button:hover { background: #357abd; }
-    .content { display: none; margin-top: 20px; }
+    body { margin: 0; font-family: 'Arial', sans-serif; background: #fff; color: #333; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding-top: 20px; }
+    .container { background: #f9f9f9; padding: 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 90%; max-width: 900px; text-align: left; }
+    h1 { font-size: 2.5em; margin-bottom: 30px; color: #2c3e50; }
+    .nav { margin-bottom: 30px; }
+    .nav button { padding: 12px 25px; margin-right: 10px; background: #3498db; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1em; }
+    .nav button:hover { background: #2980b9; }
+    .content { display: none; }
     .active { display: block; }
-    .input-group { margin: 10px 0; }
-    input { padding: 8px; width: 80%; max-width: 300px; background: #333; border: 1px solid #555; color: #fff; }
-    #canvas { border: 1px solid #555; margin-top: 10px; background: #000; }
-    textarea { width: 80%; max-width: 300px; background: #333; border: 1px solid #555; color: #fff; }
-    #codeOutput { margin-top: 10px; color: #ddd; }
+    .section { line-height: 1.6; }
+    .contact-form { margin-top: 20px; }
+    .contact-form input, .contact-form textarea { width: 100%; max-width: 600px; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 1em; }
+    .contact-form button { padding: 12px 25px; background: #2ecc71; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    .contact-form button:hover { background: #27ae60; }
+    .services ul { list-style-type: none; padding: 0; }
+    .services ul li { margin: 10px 0; }
+    .about p { max-width: 800px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Spectrus</h1>
-    <button class="button" onclick="showSection('info')">Info</button>
-    <button class="button" onclick="showSection('image')">Image</button>
-    <button class="button" onclick="showSection('game')">Jeu</button>
-    <button class="button" onclick="showSection('code')">Code</button>
-    <div id="info" class="content active">
-      <p>Bienvenue sur Spectrus ! Explorez les fonctionnalités ci-dessous.</p>
+    <h1>Spectrus - Solutions Innovantes</h1>
+    <div class="nav">
+      <button onclick="showSection('about')">À Propos</button>
+      <button onclick="showSection('services')">Services</button>
+      <button onclick="showSection('contact')">Contact</button>
     </div>
-    <div id="image" class="content">
-      <div class="input-group">
-        <input type="text" id="imagePrompt" placeholder="Décris une image...">
-        <button class="button" onclick="generateImage()">Générer</button>
+    <div id="about" class="content active section">
+      <h2>À Propos</h2>
+      <p>Spectrus est une entreprise dédiée à fournir des solutions technologiques avancées pour les entreprises modernes. Notre mission est d’optimiser vos processus avec des outils innovants et fiables.</p>
+    </div>
+    <div id="services" class="content section">
+      <h2>Nos Services</h2>
+      <ul class="services">
+        <li>Développement logiciel sur mesure</li>
+        <li>Consultation en technologie</li>
+        <li>Intégration de systèmes IoT</li>
+        <li>Support technique 24/7</li>
+      </ul>
+    </div>
+    <div id="contact" class="content section">
+      <h2>Contactez-Nous</h2>
+      <div class="contact-form">
+        <input type="text" id="name" placeholder="Votre nom" required>
+        <input type="email" id="email" placeholder="Votre email" required>
+        <textarea id="message" rows="5" placeholder="Votre message" required></textarea>
+        <button onclick="submitContact()">Envoyer</button>
       </div>
-      <canvas id="canvas" width="400" height="400"></canvas>
-    </div>
-    <div id="game" class="content">
-      <button class="button" onclick="startGame()">Démarrer</button>
-      <p id="gameScore">Score: 0</p>
-    </div>
-    <div id="code" class="content">
-      <textarea id="codeEditor" rows="5" placeholder="Écris ton code ici..."></textarea>
-      <button class="button" onclick="runCode()">Exécuter</button>
-      <div id="codeOutput"></div>
+      <p id="contactResult"></p>
     </div>
   </div>
 
@@ -53,32 +62,17 @@
       document.getElementById(section).classList.add('active');
     }
 
-    function generateImage() {
-      const prompt = document.getElementById('imagePrompt').value;
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#fff';
-      ctx.font = '20px Arial';
-      ctx.fillText(prompt.substring(0, 20) || 'Image générée', 10, 20);
-      alert('Image générée (simulation) : ' + prompt);
-    }
-
-    let score = 0;
-    function startGame() {
-      score++;
-      document.getElementById('gameScore').textContent = 'Score: ' + score;
-      alert('Jeu démarré ! Clique pour augmenter le score.');
-    }
-
-    function runCode() {
-      const code = document.getElementById('codeEditor').value;
-      try {
-        const output = eval(code);
-        document.getElementById('codeOutput').textContent = 'Résultat : ' + (output || 'OK');
-      } catch (e) {
-        document.getElementById('codeOutput').textContent = 'Erreur : ' + e.message;
+    function submitContact() {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const message = document.getElementById('message').value;
+      if (name && email && message) {
+        document.getElementById('contactResult').textContent = 'Merci, ' + name + '! Votre message a été envoyé.';
+        document.getElementById('name').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('message').value = '';
+      } else {
+        document.getElementById('contactResult').textContent = 'Veuillez remplir tous les champs.';
       }
     }
   </script>
