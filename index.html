@@ -26,16 +26,8 @@
     .contact-form button:hover { background: #27ae60; }
     .services ul { list-style-type: none; padding: 0; text-align: left; margin: 0 auto; max-width: 600px; }
     .services ul li { margin: 10px 0; }
-    @media (max-width: 600px) {
-      .container { width: 95%; }
-      input, textarea, button { max-width: 100%; }
-      .section { padding: 15px; }
-      #chatBox { height: 200px; }
-    }
-    @media (min-width: 601px) and (max-width: 900px) {
-      .container { width: 90%; }
-      input, textarea, button { max-width: 350px; }
-    }
+    @media (max-width: 600px) { .container { width: 95%; } input, textarea, button { max-width: 100%; } .section { padding: 15px; } #chatBox { height: 200px; } }
+    @media (min-width: 601px) and (max-width: 900px) { .container { width: 90%; } input, textarea, button { max-width: 350px; } }
   </style>
 </head>
 <body>
@@ -79,8 +71,8 @@
         <div class="form-group">
           <input type="password" id="password" placeholder="Mot de passe" required>
         </div>
-        <button onclick="login()">Se connecter</button>
-        <button onclick="register()">S'inscrire</button>
+        <button onclick="redirectToLogin('login')">Se connecter</button>
+        <button onclick="redirectToLogin('register')">S'inscrire</button>
       </div>
       <div id="chatArea" class="chat" style="display: none;">
         <div id="chatBox"></div>
@@ -115,110 +107,5 @@
       }
     }
 
-    function login() {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      fetch('backend.html?action=login&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password))
-        .then(response => response.text())
-        .then(data => {
-          if (data === 'success') {
-            currentUser = { username, avatar: 'https://via.placeholder.com/30' };
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('chatArea').style.display = 'block';
-            loadMessages();
-            startPolling();
-          } else {
-            alert('Échec de la connexion.');
-          }
-        });
-    }
-
-    function register() {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      fetch('backend.html?action=register&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password))
-        .then(response => response.text())
-        .then(data => {
-          if (data === 'success') {
-            currentUser = { username, avatar: 'https://via.placeholder.com/30' };
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('chatArea').style.display = 'block';
-            startPolling();
-          } else {
-            alert('Échec de l\'inscription.');
-          }
-        });
-    }
-
-    function logout() {
-      currentUser = null;
-      document.getElementById('chatArea').style.display = 'none';
-      document.getElementById('login').style.display = 'block';
-      document.getElementById('chatBox').innerHTML = '';
-      stopPolling();
-    }
-
-    function loadMessages() {
-      fetch('backend.html?action=getMessages')
-        .then(response => response.json())
-        .then(data => {
-          messages = data;
-          const chatBox = document.getElementById('chatBox');
-          chatBox.innerHTML = messages.map(msg => 
-            `<div class="message"><img src="${msg.avatar}"><strong>${msg.username}</strong>: ${msg.text}</div>`
-          ).join('');
-          chatBox.scrollTop = chatBox.scrollHeight;
-        });
-    }
-
-    function sendMessage() {
-      const messageInput = document.getElementById('messageInput').value;
-      if (messageInput && currentUser) {
-        fetch('backend.html?action=sendMessage&username=' + encodeURIComponent(currentUser.username) + '&text=' + encodeURIComponent(messageInput) + '&avatar=' + encodeURIComponent(currentUser.avatar))
-          .then(() => {
-            loadMessages();
-            document.getElementById('messageInput').value = '';
-          });
-      }
-    }
-
-    function updateAvatar() {
-      const file = document.getElementById('avatarUpload').files[0];
-      if (file && currentUser) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          currentUser.avatar = e.target.result;
-          fetch('backend.html?action=updateAvatar&username=' + encodeURIComponent(currentUser.username) + '&avatar=' + encodeURIComponent(currentUser.avatar))
-            .then(() => {
-              document.getElementById('avatarPreview').src = currentUser.avatar;
-              loadMessages();
-            });
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    let pollingInterval;
-    function startPolling() {
-      pollingInterval = setInterval(() => {
-        fetch('backend.html?action=getMessages')
-          .then(response => response.json())
-          .then(data => {
-            if (JSON.stringify(data) !== JSON.stringify(messages)) {
-              messages = data;
-              loadMessages();
-            }
-          });
-      }, 2000);
-    }
-
-    function stopPolling() {
-      clearInterval(pollingInterval);
-    }
-
-    window.onload = () => {
-      showSection('about');
-    };
-  </script>
-</body>
-</html>
+    function redirectToLogin(action) {
+      window.location.href =
