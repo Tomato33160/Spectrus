@@ -15,7 +15,6 @@
       localStorage.setItem('messages', JSON.stringify(messages));
     }
 
-    // Gère les requêtes
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const action = urlParams.get('action');
@@ -43,8 +42,9 @@
       } else if (action === 'sendMessage') {
         const username = urlParams.get('username');
         const text = urlParams.get('text');
+        const avatar = urlParams.get('avatar');
         if (username && text) {
-          messages.push({ username, text, avatar: users[username]?.avatar || 'https://via.placeholder.com/30', timestamp: new Date() });
+          messages.push({ username, text, avatar, timestamp: new Date() });
           saveData();
         }
         document.write('success');
