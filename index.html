@@ -3,60 +3,221 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spectrus - Backend</title>
+  <title>Spectrus - Solutions & Chat</title>
+  <style>
+    body { margin: 0; font-family: 'Arial', sans-serif; background: #000; color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+    .container { width: 90%; max-width: 900px; padding: 20px; }
+    .nav { margin-bottom: 20px; text-align: center; }
+    .nav button { padding: 10px 20px; margin: 0 5px; background: #3498db; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+    .nav button:hover { background: #2980b9; }
+    .content { display: none; text-align: center; }
+    .active { display: block; }
+    .section { padding: 20px; background: #1a1a1a; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    .login .form-group, .chat .form-group { margin: 10px 0; }
+    input, textarea, button { width: 100%; max-width: 400px; padding: 10px; margin: 5px 0; border: 1px solid #555; border-radius: 5px; background: #333; color: #fff; }
+    button { background: #3498db; color: #fff; border: none; cursor: pointer; }
+    button:hover { background: #2980b9; }
+    #chatBox { height: 300px; overflow-y: auto; border: 1px solid #555; padding: 10px; margin: 10px 0; background: #000; }
+    .message { margin: 5px 0; }
+    .message img { width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 10px; }
+    #avatarPreview { width: 100px; height: 100px; border-radius: 50%; margin-top: 10px; }
+    .contact-form input, .contact-form textarea { max-width: 600px; }
+    .contact-form button { background: #2ecc71; }
+    .contact-form button:hover { background: #27ae60; }
+    .services ul { list-style-type: none; padding: 0; text-align: left; margin: 0 auto; max-width: 600px; }
+    .services ul li { margin: 10px 0; }
+    @media (max-width: 600px) {
+      .container { width: 95%; }
+      input, textarea, button { max-width: 100%; }
+      .section { padding: 15px; }
+      #chatBox { height: 200px; }
+    }
+    @media (min-width: 601px) and (max-width: 900px) {
+      .container { width: 90%; }
+      input, textarea, button { max-width: 350px; }
+    }
+  </style>
 </head>
 <body>
-  <script>
-    let users = JSON.parse(localStorage.getItem('users')) || {};
-    let messages = JSON.parse(localStorage.getItem('messages')) || [];
+  <div class="container">
+    <h1 style="text-align: center; color: #3498db;">Spectrus</h1>
+    <div class="nav">
+      <button onclick="showSection('about')">À Propos</button>
+      <button onclick="showSection('services')">Services</button>
+      <button onclick="showSection('contact')">Contact</button>
+      <button onclick="showSection('chat')">Chat</button>
+    </div>
+    <div id="about" class="content active section">
+      <h2>À Propos</h2>
+      <p>Spectrus offre des solutions technologiques avancées pour optimiser vos processus avec des outils innovants.</p>
+    </div>
+    <div id="services" class="content section">
+      <h2>Nos Services</h2>
+      <ul class="services">
+        <li>Développement logiciel</li>
+        <li>Consultation tech</li>
+        <li>Intégration IoT</li>
+        <li>Support 24/7</li>
+      </ul>
+    </div>
+    <div id="contact" class="content section">
+      <h2>Contact</h2>
+      <form class="contact-form" action="mailto:spectrus33160@gmail.com" method="POST" enctype="text/plain">
+        <input type="text" name="name" placeholder="Votre nom" required>
+        <input type="email" name="email" placeholder="Votre email" required>
+        <textarea name="message" rows="5" placeholder="Votre message" required></textarea>
+        <button type="submit">Envoyer</button>
+      </form>
+      <p style="color: #7f8c8d;">Email: <a href="mailto:spectrus33160@gmail.com" style="color: #3498db;">spectrus33160@gmail.com</a></p>
+    </div>
+    <div id="chat" class="content section">
+      <h2>Chat Spectrus</h2>
+      <div id="login" class="login">
+        <div class="form-group">
+          <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+        </div>
+        <div class="form-group">
+          <input type="password" id="password" placeholder="Mot de passe" required>
+        </div>
+        <button onclick="login()">Se connecter</button>
+        <button onclick="register()">S'inscrire</button>
+      </div>
+      <div id="chatArea" class="chat" style="display: none;">
+        <div id="chatBox"></div>
+        <div class="form-group">
+          <textarea id="messageInput" placeholder="Tapez votre message..." required></textarea>
+        </div>
+        <button onclick="sendMessage()">Envoyer</button>
+        <div class="form-group">
+          <input type="file" id="avatarUpload" accept="image/*">
+          <img id="avatarPreview" src="https://via.placeholder.com/100">
+        </div>
+        <button onclick="updateAvatar()">Mettre à jour l'avatar</button>
+        <button onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+  </div>
 
-    function saveData() {
-      localStorage.setItem('users', JSON.stringify(users));
-      localStorage.setItem('messages', JSON.stringify(messages));
+  <script>
+    let currentUser = null;
+    let messages = [];
+
+    function showSection(section) {
+      document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+      document.getElementById(section).classList.add('active');
+      if (section === 'chat' && currentUser) {
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('chatArea').style.display = 'block';
+        loadMessages();
+      } else if (section === 'chat' && !currentUser) {
+        document.getElementById('login').style.display = 'block';
+        document.getElementById('chatArea').style.display = 'none';
+      }
+    }
+
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      fetch('backend.html?action=login&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password))
+        .then(response => response.text())
+        .then(data => {
+          if (data === 'success') {
+            currentUser = { username, avatar: 'https://via.placeholder.com/30' };
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('chatArea').style.display = 'block';
+            loadMessages();
+            startPolling();
+          } else {
+            alert('Échec de la connexion.');
+          }
+        });
+    }
+
+    function register() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      fetch('backend.html?action=register&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password))
+        .then(response => response.text())
+        .then(data => {
+          if (data === 'success') {
+            currentUser = { username, avatar: 'https://via.placeholder.com/30' };
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('chatArea').style.display = 'block';
+            startPolling();
+          } else {
+            alert('Échec de l\'inscription.');
+          }
+        });
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('chatArea').style.display = 'none';
+      document.getElementById('login').style.display = 'block';
+      document.getElementById('chatBox').innerHTML = '';
+      stopPolling();
+    }
+
+    function loadMessages() {
+      fetch('backend.html?action=getMessages')
+        .then(response => response.json())
+        .then(data => {
+          messages = data;
+          const chatBox = document.getElementById('chatBox');
+          chatBox.innerHTML = messages.map(msg => 
+            `<div class="message"><img src="${msg.avatar}"><strong>${msg.username}</strong>: ${msg.text}</div>`
+          ).join('');
+          chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+
+    function sendMessage() {
+      const messageInput = document.getElementById('messageInput').value;
+      if (messageInput && currentUser) {
+        fetch('backend.html?action=sendMessage&username=' + encodeURIComponent(currentUser.username) + '&text=' + encodeURIComponent(messageInput) + '&avatar=' + encodeURIComponent(currentUser.avatar))
+          .then(() => {
+            loadMessages();
+            document.getElementById('messageInput').value = '';
+          });
+      }
+    }
+
+    function updateAvatar() {
+      const file = document.getElementById('avatarUpload').files[0];
+      if (file && currentUser) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentUser.avatar = e.target.result;
+          fetch('backend.html?action=updateAvatar&username=' + encodeURIComponent(currentUser.username) + '&avatar=' + encodeURIComponent(currentUser.avatar))
+            .then(() => {
+              document.getElementById('avatarPreview').src = currentUser.avatar;
+              loadMessages();
+            });
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    let pollingInterval;
+    function startPolling() {
+      pollingInterval = setInterval(() => {
+        fetch('backend.html?action=getMessages')
+          .then(response => response.json())
+          .then(data => {
+            if (JSON.stringify(data) !== JSON.stringify(messages)) {
+              messages = data;
+              loadMessages();
+            }
+          });
+      }, 2000);
+    }
+
+    function stopPolling() {
+      clearInterval(pollingInterval);
     }
 
     window.onload = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const action = urlParams.get('action');
-
-      if (action === 'login') {
-        const username = urlParams.get('username');
-        const password = urlParams.get('password');
-        if (users[username] && users[username].password === password) {
-          document.write('success');
-        } else {
-          document.write('fail');
-        }
-      } else if (action === 'register') {
-        const username = urlParams.get('username');
-        const password = urlParams.get('password');
-        if (!users[username]) {
-          users[username] = { password, avatar: 'https://via.placeholder.com/30' };
-          saveData();
-          document.write('success');
-        } else {
-          document.write('fail');
-        }
-      } else if (action === 'getMessages') {
-        document.write(JSON.stringify(messages));
-      } else if (action === 'sendMessage') {
-        const username = urlParams.get('username');
-        const text = urlParams.get('text');
-        const avatar = urlParams.get('avatar');
-        if (username && text) {
-          messages.push({ username, text, avatar, timestamp: new Date() });
-          saveData();
-        }
-        document.write('success');
-      } else if (action === 'updateAvatar') {
-        const username = urlParams.get('username');
-        const avatar = urlParams.get('avatar');
-        if (username && avatar) {
-          users[username].avatar = avatar;
-          saveData();
-        }
-        document.write('success');
-      }
+      showSection('about');
     };
   </script>
 </body>
